@@ -1,0 +1,87 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  This cfn file is used for creating a template which runs S3 static 
+  web-hosting using cloudfront distribution.
+Parameters:
+  myDomainName:
+    Description: it will be f.qualified domain name use both in s3 and R53 
+    Type: String
+    AllowedPattern: (?!-)[a-zA-Z0-9-.]{1,63}(?<!-)
+
+
+Resources:
+  
+  myS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref myDomainName
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: FALSE
+      WebsiteConfiguration:
+        IndexDocument: index.html
+    
+  myS3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref myS3Bucket # Required
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - 's3:GetObject'
+            Effect: Allow
+            Resource: !Join
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref myS3Bucket
+                - /*
+            Principal: '*'
+
+  myCloudFront:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Aliases: 
+          - !Ref myDomainName
+        Comment: my cloudfront dist
+        DefaultCacheBehavior: 
+          
+          AllowedMethods: 
+            - GET
+            - HAD
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+          Compress: true
+
+          TargetOriginId: ishakcltfrnt ###
+          ViewerProtocolPolicy: allow-all
+
+
+        DefaultRootObject: index.html
+        Enabled: true
+        HttpVersion: http2
+       
+
+        Origins: 
+          - CustomOriginConfig: 
+              OriginProtocolPolicy: http-only
+            DomainName: !Select [1, !Split ["//", !GetAtt myS3Bucket.WebsiteURL]]
+            Id: ishakcltfrnt
+
+        PriceClass: PriceClass_All
+        ViewerCertificate: 
+          AcmCertificateArn: arn:aws:acm:us-east-1:358030838563:certificate/7ce0b146-073a-41bd-b039-7fcff1d01c68
+          MinimumProtocolVersion: TLSv1.2_2021
+          SslSupportMethod: sni-only
+
+    myRoute53Record:
+      Type: AWS::Route53::RecordSetGroup
+      Properties:
+        Comment: "String"
+        HostedZoneId: "String"
+        RecordSets: 
+          RecordSets
+
+#Outputs:

@@ -64,18 +64,18 @@ Resources:
             Id: ishakcloudfront
         PriceClass: PriceClass_All
         ViewerCertificate: 
-          AcmCertificateArn: arn:aws:acm:us-east-1:358030838563:certificate/7ce0b146-073a-41bd-b039-7fcff1d01c68
+          AcmCertificateArn: arn:aws:acm:us-east-1:358030838563:certificate/7ce0b146-073a-41bd-b039-7fcff1d01c68 # sertifia arn alınmalı.
           MinimumProtocolVersion: TLSv1.2_2021
           SslSupportMethod: sni-only
 
   myRoute53Record:
     Type: AWS::Route53::RecordSetGroup
     Properties:
-      HostedZoneId: Z09313363G604OAZR9VMR
+      HostedZoneId: Z09313363G604OAZR9VMR  # Route53 teki hostedzoneId alınmalı.
       RecordSets: 
         - AliasTarget: 
             DNSName: !GetAtt myCloudFront.DomainName
-            HostedZoneId: Z2FDTNDATAQYW2
+            HostedZoneId: Z2FDTNDATAQYW2  # aws tarafından alias eklediğimizden burada aws default Id veriyor. source : doc.aws.amazon.com
           Name: !Ref myDomainName
           Type: A
 
